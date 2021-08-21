@@ -21,8 +21,37 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repo
       - uses: actions/checkout@v2
 
+      - name: Node setup
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      #AWS access
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-1
+
+      - name: npm install
+        run: npm i
+
+      - name: build
+        run: STAGE=dev npm run build
+      
+      - name: copy files to s3
+        run: aws s3 sync ./dist s3://palace-s3
+
+      - name: Invalidate cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E2ZC7WSC9VW3BV \
+            --paths "/*"
+
+  
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
