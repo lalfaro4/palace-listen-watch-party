@@ -39,8 +39,8 @@ jobs:
       - name: npm install
         run: npm i
 
-      - name: build
-        run: STAGE=dev npm run build
+      #- name: build
+      #  run: STAGE=dev npm run build
       
       - name: copy files to s3
         run: aws s3 sync ./dist s3://palace-s3
